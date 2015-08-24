@@ -12,9 +12,10 @@ probe_url = "https://atlas.ripe.net/api/v1/probe/"
 ASNs = {'AS5607':['Sky','2346731'],'AS2856':['BT','2346732'],'AS5089': ['Virgin Media','2346734'],'AS13285':['TalkTalk','2346735'],'AS20712':['Andrews & Arnold','2346736']}
 ignore_recursors = ['8.8.8.8','8.8.4.4','208.67.222.222','208.67.222.220']
 
-results = []
+results = {}
 
 for ISP in ASNs:
+    isp_index = 0
     url = url_prefix + str(ASNs[ISP][1]) + url_suffix
     response = urllib.urlopen(url)
     data = json.load(response)
@@ -52,21 +53,32 @@ for ISP in ASNs:
         AS[timestamp][probe_id] = response_time
 
     #print "ASN : ProbeID : Timestamp : ResponseTime"
-    for time in AS:
+    for timestamp in AS:
         rt = 0
         count = 0
-        for probe in AS[time]:
-            rt = rt + AS[time][probe]
+        for probe in AS[timestamp]:
+            rt = rt + AS[timestamp][probe]
             count = count + 1
         rt = rt / count
-        results.append([ISP,time,rt])
+        # Initialise dictionary per timestamp if non-existent
+        if not results.get(timestamp):
+            results[timestamp] = {}
+        #Update dictionary of dictionaries
+        results[timestamp][ISP] = rt
 
 with open(filename, 'wb') as f:
 ##
 ## Write flattened list to CSV
+    listASNs = ['Date']
     writer = csv.writer(f)
-    for foo in results:
-        row = [foo[1], ASNs[foo[0]][0], foo[2]]
+    for ASN in ASNs:
+        listASNs.append(ASN)
+    writer.writerow(listASNs)
+
+    for timestamp in results:
+        row = [timestamp]
+        for ASN in ASNs:
+            row.append(results[timestamp][ASN])
         writer.writerow(row)
 
 
