@@ -75,7 +75,7 @@ with open(filename, 'wb') as f:
         listASNs.append(ASN)
     writer.writerow(listASNs)
 
-    for timestamp in results:
+    for timestamp in sorted(results):
         row = [timestamp]
         for ASN in ASNs:
             row.append(results[timestamp][ASN])
