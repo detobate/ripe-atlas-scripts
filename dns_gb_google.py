@@ -72,7 +72,8 @@ with open(filename, 'wb') as f:
     listASNs = ['Date']
     writer = csv.writer(f)
     for ASN in ASNs:
-        listASNs.append(ASN)
+        name = ASN + " - " + ASNs[ASN][0]
+        listASNs.append(name)
     writer.writerow(listASNs)
 
     for timestamp in sorted(results):
