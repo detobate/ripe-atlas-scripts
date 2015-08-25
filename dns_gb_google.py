@@ -9,7 +9,7 @@ filename = "/Users/rpa07/Code/ripeatlas/dns_results.csv"
 url_prefix = "https://atlas.ripe.net/api/v1/measurement/"
 url_suffix = "/result/?format=json"
 probe_url = "https://atlas.ripe.net/api/v1/probe/"
-ASNs = {'AS5607':['Sky','2347674'],'AS2856':['BT','2347675'],'AS5089': ['Virgin Media','2347676'],'AS13285':['TalkTalk','2347678'],'AS20712':['Andrews & Arnold','2347679']}
+ASNs = {'AS5607':['Sky','2347674'],'AS2856':['BT','2347716'],'AS5089': ['Virgin Media','2347676'],'AS13285':['TalkTalk','2347678'],'AS20712':['Andrews & Arnold','2347717']}
 ignore_recursors = ['8.8.8.8','8.8.4.4','208.67.222.222','208.67.222.220']
 
 results = {}
