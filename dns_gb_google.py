@@ -79,7 +79,10 @@ with open(filename, 'wb') as f:
     for timestamp in sorted(results):
         row = [timestamp]
         for ASN in ASNs:
-            row.append(results[timestamp][ASN])
+            try:
+                row.append(results[timestamp][ASN])
+            except KeyError:
+                pass
         writer.writerow(row)
 
 
