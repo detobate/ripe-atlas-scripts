@@ -5,11 +5,10 @@ import datetime
 import requests
 from ripe.atlas.sagan import SslResult
 
-filename = "/Users/rpa07/Code/ripeatlas/ssl_facebookv4.csv"
 url_prefix = "https://atlas.ripe.net/api/v1/measurement/"
 url_suffix = "/result/?format=json"
 probe_url = "https://atlas.ripe.net/api/v1/probe/"
-measurements = {'IPv4':'2417352','IPv6':'2417351'}
+measurements = {'IPv4':'2426343','IPv6':'2426342'}
 
 resultsv4 = {}
 resultsv6 = {}
@@ -21,12 +20,14 @@ for family in measurements:
     response = requests.get(url).json()
 
     for probe in response:
+        # Catch failed results
         if 'dnserr' in probe:
-            break
+            continue
         try:
             result = SslResult(probe)
         except:
             pass
+        # We don't care about the minutes, collate all results in to the nearest hour
         roundedtime = result.created.format('YYYYMMDD-HH00')
 
         if family == 'IPv4':
@@ -57,6 +58,7 @@ for family in measurements:
             else:
                 countv6[roundedtime] = 1
 
+# Output stuff here.  Munge in to Google graphing API.
 for time in sorted(resultsv4):
     print "Average IPv4 response time: ", time, ":", (resultsv4[time] / countv4[time])
 
