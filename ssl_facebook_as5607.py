@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 
-import urllib
+import time
 import datetime
 import requests
+import ujson
 from ripe.atlas.sagan import SslResult
 
+now = int(time.time())
+start_time = now - 2628000 # 1 Month
+#start_time = now - 7884000 # 3 Months
 url_prefix = "https://atlas.ripe.net/api/v1/measurement/"
-url_suffix = "/result/?format=json"
+url_suffix = "/result/?start=%s&stop=%s&format=json" % (start_time, now)
 probe_url = "https://atlas.ripe.net/api/v1/probe/"
 measurements = {'IPv4':'2426343','IPv6':'2426342'}
 
@@ -17,7 +21,8 @@ countv6 = {}
 
 for family in measurements:
     url = url_prefix + str(measurements[family]) + url_suffix
-    response = requests.get(url).json()
+    response = requests.get(url)
+    response = ujson.loads(response.text)
 
     for probe in response:
         # Catch failed results
