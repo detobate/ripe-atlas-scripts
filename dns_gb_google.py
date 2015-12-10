@@ -4,10 +4,15 @@ import json
 import csv
 import urllib
 import datetime
+import time
 
+now = int(time.time())
+#start_time = now - 2628000 # 1 Month
+start_time = now - 5256000 # 2 Months
+#start_time = now - 7884000 # 3 Months
 filename = "/Users/rpa07/Code/ripeatlas/dns_results.csv"
 url_prefix = "https://atlas.ripe.net/api/v1/measurement/"
-url_suffix = "/result/?format=json"
+url_suffix = "/result/?start=%s&stop=%s&format=json" % (start_time, now)
 probe_url = "https://atlas.ripe.net/api/v1/probe/"
 ASNs = {'AS5607':['Sky','2347674'],'AS2856':['BT','2347716'],'AS5089': ['Virgin Media','2347676'],'AS13285':['TalkTalk','2347678'],'AS20712':['Andrews & Arnold','2347717']}
 ignore_recursors = ['8.8.8.8','8.8.4.4','208.67.222.222','208.67.222.220']
