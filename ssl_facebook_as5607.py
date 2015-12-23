@@ -11,9 +11,9 @@ now = int(time.time())
 start_time = now - 1209600      # 2 weeks
 #start_time = now - 2628000      # 1 Month
 #start_time = now - 7884000     # 3 Months
-url_prefix = "https://atlas.ripe.net/api/v1/measurement/"
-url_suffix = "/result/?start=%s&stop=%s&format=json" % (start_time, now)
-probe_url = "https://atlas.ripe.net/api/v1/probe/"
+url_prefix = "https://atlas.ripe.net/api/v2/measurements/"
+url_suffix = "/results?start=%s&stop=%s&format=json" % (start_time, now)
+probe_url = "https://atlas.ripe.net/api/v2/probe/"
 measurements = {'IPv4':'2426343','IPv6':'2426342'}
 
 resultsv4 = {}
@@ -35,13 +35,16 @@ for family in measurements:
         except:
             pass
 
+        # Catch results with errors and skip to the next loop
+        if result.is_error is True:
+            #print("Probe: %s sucks because %s" % (result.probe_id, result.error_message))
+            continue
         # Exclude anomalies
         if result.response_time is not None and result.response_time >= anomaly:
-            break
+            continue
 
         # We don't care about the minutes, collate all results in to the nearest hour
         roundedtime = result.created.strftime('%Y%m%d-%H00')
-
 
         if family == 'IPv4':
             if roundedtime in resultsv4:
@@ -86,3 +89,5 @@ for time in sorted(resultsv4):
             first = False
         except:
             pass
+
+print(url)
