@@ -6,9 +6,11 @@ import requests
 import ujson
 from ripe.atlas.sagan import SslResult
 
+anomaly = 2000                  # How long is too long?
 now = int(time.time())
-start_time = now - 2628000 # 1 Month
-#start_time = now - 7884000 # 3 Months
+start_time = now - 1209600      # 2 weeks
+#start_time = now - 2628000      # 1 Month
+#start_time = now - 7884000     # 3 Months
 url_prefix = "https://atlas.ripe.net/api/v1/measurement/"
 url_suffix = "/result/?start=%s&stop=%s&format=json" % (start_time, now)
 probe_url = "https://atlas.ripe.net/api/v1/probe/"
@@ -32,8 +34,14 @@ for family in measurements:
             result = SslResult(probe)
         except:
             pass
+
+        # Exclude anomalies
+        if result.response_time is not None and result.response_time >= anomaly:
+            break
+
         # We don't care about the minutes, collate all results in to the nearest hour
-        roundedtime = result.created.format('YYYYMMDD-HH00')
+        roundedtime = result.created.strftime('%Y%m%d-%H00')
+
 
         if family == 'IPv4':
             if roundedtime in resultsv4:
@@ -64,8 +72,17 @@ for family in measurements:
                 countv6[roundedtime] = 1
 
 # Output stuff here.  Munge in to Google graphing API.
+first = True
 for time in sorted(resultsv4):
-    print "Average IPv4 response time: ", time, ":", (resultsv4[time] / countv4[time])
-
-for time in sorted(resultsv6):
-    print "Average IPv6 response time: ", time, ":", (resultsv6[time] / countv6[time])
+    if first is True:
+        try:
+            print("['%s', %s, %s]" % (time,(resultsv4[time] / countv4[time]),(resultsv6[time] / countv6[time])))
+            first = False
+        except:
+            pass
+    else:
+        try:
+            print(",\n['%s', %s, %s]" % (time,(resultsv4[time] / countv4[time]),(resultsv6[time] / countv6[time])))
+            first = False
+        except:
+            pass
