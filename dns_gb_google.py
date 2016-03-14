@@ -7,14 +7,16 @@ import datetime
 import time
 
 now = int(time.time())
+start_time = now - 86400 # 1 day
+#start_time = now - 604800 # 1 week
 #start_time = now - 2628000 # 1 Month
-start_time = now - 5256000 # 2 Months
+#start_time = now - 5256000 # 2 Months
 #start_time = now - 7884000 # 3 Months
-filename = "/Users/rpa07/Code/ripeatlas/dns_results.csv"
+filename = "dns_results.csv"
 url_prefix = "https://atlas.ripe.net/api/v1/measurement/"
 url_suffix = "/result/?start=%s&stop=%s&format=json" % (start_time, now)
 probe_url = "https://atlas.ripe.net/api/v1/probe/"
-ASNs = {'AS5607':['Sky','2347674'],'AS2856':['BT','2347716'],'AS5089': ['Virgin Media','2347676'],'AS13285':['TalkTalk','2347678'],'AS20712':['Andrews & Arnold','2347717']}
+ASNs = {'AS5607':['Sky','3363831'],'AS2856':['BT','2348122'],'AS5089': ['Virgin Media','2347676'],'AS13285':['TalkTalk','2347678'],'AS20712':['Andrews & Arnold','2348128']}
 ignore_recursors = ['8.8.8.8','8.8.4.4','208.67.222.222','208.67.222.220']
 
 results = {}
@@ -25,18 +27,23 @@ for ISP in ASNs:
     response = urllib.urlopen(url)
     data = json.load(response)
     AS = {}
+    probe_data = {}
 
     for measurement in data:
-        # Fetch source ASN for each probe
-        probe_url2 = probe_url + str(measurement['prb_id']) + "/"
-        probe_response = urllib.urlopen(probe_url2)
-        probe_data = json.load(probe_response)
-        probe_asn = probe_data['asn_v4']
+        # Fetch probe details
+        probe_id = str(measurement['prb_id'])
+        if probe_id in probe_data:
+            pass
+        else:
+            probe_url2 = probe_url + probe_id + "/"
+            probe_response = urllib.urlopen(probe_url2)
+            probe_data[probe_id] = json.load(probe_response)
+
+        probe_asn = probe_data[probe_id]['asn_v4']
 
         # Probe IP Address
         probe_ip = measurement['from']
-        # Probe ID
-        probe_id = measurement['prb_id']
+
         # Generate rounded timestamp from measurement Unix time
         timestamp = datetime.datetime.fromtimestamp(measurement['timestamp']).strftime('%Y%m%d%H00')
         # Initialise dictionary per timestamp if non-existent
@@ -55,6 +62,11 @@ for ISP in ASNs:
 
         # Check to see if the recursor is excluded
         if recursor in ignore_recursors: continue
+        # Check to see if the probe has moved ASNs since allocation
+        if int(probe_asn) != int(ISP[2:]):
+            print("WARNING: Probe ID %s has moved from %s to AS%s. Ignoring value" % (probe_id, ISP, probe_asn))
+            continue
+
         AS[timestamp][probe_id] = response_time
 
     #print "ASN : ProbeID : Timestamp : ResponseTime"
@@ -87,7 +99,8 @@ with open(filename, 'wb') as f:
             try:
                 row.append(results[timestamp][ASN])
             except KeyError:
-                pass
+                # Print a zero instead of null so we keep the output sane
+                row.append("0")
         writer.writerow(row)
 
 
