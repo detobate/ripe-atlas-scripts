@@ -13,10 +13,10 @@ start_time = now - 86400 # 1 day
 #start_time = now - 5256000 # 2 Months
 #start_time = now - 7884000 # 3 Months
 filename = "dns_results.csv"
-url_prefix = "https://atlas.ripe.net/api/v1/measurement/"
-url_suffix = "/result/?start=%s&stop=%s&format=json" % (start_time, now)
-probe_url = "https://atlas.ripe.net/api/v1/probe/"
-ASNs = {'AS5607':['Sky','3363831'],'AS2856':['BT','2348122'],'AS5089': ['Virgin Media','2347676'],'AS13285':['TalkTalk','2347678'],'AS20712':['Andrews & Arnold','2348128']}
+url_prefix = "https://atlas.ripe.net/api/v2/measurements/"
+url_suffix = "/results/?start_time=%s&stop_time=%s" % (start_time, now)
+probe_url = "https://atlas.ripe.net/api/v2/probe/"
+ASNs = {'AS5607':['Sky','16375685'],'AS2856':['BT','16375695'],'AS5089': ['Virgin Media','16375706'],'AS13285':['TalkTalk','16375914'],'AS20712':['Andrews & Arnold','16375740']}
 ignore_recursors = ['8.8.8.8','8.8.4.4','208.67.222.222','208.67.222.220']
 abnormal = 500 # ignore results that are abnormally high (in ms)
 
@@ -27,6 +27,11 @@ for ISP in ASNs:
     url = url_prefix + str(ASNs[ISP][1]) + url_suffix
     response = urllib.urlopen(url)
     data = json.load(response)
+    if 'error' in data:
+        print('Failed to fetch data: {}'.format(data['error']))
+        print(url)
+        exit(1)
+
     AS = {}
     probe_data = {}
 
@@ -40,7 +45,7 @@ for ISP in ASNs:
             probe_response = urllib.urlopen(probe_url2)
             probe_data[probe_id] = json.load(probe_response)
 
-        probe_asn = probe_data[probe_id]['asn_v4']
+        #probe_asn = probe_data[probe_id]['asn_v4']
 
         # Probe IP Address
         probe_ip = measurement['from']
@@ -64,9 +69,9 @@ for ISP in ASNs:
         # Check to see if the recursor is excluded
         if recursor in ignore_recursors: continue
         # Check to see if the probe has moved ASNs since allocation
-        if int(probe_asn) != int(ISP[2:]):
-            print("WARNING: Probe ID %s has moved from %s to AS%s. Ignoring value" % (probe_id, ISP, probe_asn))
-            continue
+        #if int(probe_asn) != int(ISP[2:]):
+        #    print("WARNING: Probe ID %s has moved from %s to AS%s. Ignoring value" % (probe_id, ISP, probe_asn))
+        #    continue
 
         AS[timestamp][probe_id] = response_time
 
