@@ -18,9 +18,9 @@ url_prefix = '/measurements/'
 url_suffix = '/results/?start_time=%s&stop_time=%s' % (start_time, now)
 probe_url = 'https://atlas.ripe.net/api/v2/probe/'
 ASNs = {'AS5607':['Sky','16375685'],'AS2856':['BT','16375695'],'AS5089': ['Virgin Media','16375706'],
-        'AS13285':['TalkTalk','16375914'],'AS20712':['Andrews & Arnold','16375740'],
+        'AS13285':['TalkTalk','16389541'],'AS20712':['Andrews & Arnold','16375740'],
         'AS13037': ['Zen Internet', '16388535'], 'AS56478': ['Hyperoptic', '16388541']}
-ignore_recursors = ['8.8.8.8','8.8.4.4','208.67.222.222','208.67.222.220']
+ignore_recursors = ['8.8.8.8','8.8.4.4','208.67.222.222','208.67.222.220', '1.1.1.1']
 abnormal = 300 # ignore results that are abnormally high (in ms)
 
 
