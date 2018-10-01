@@ -27,6 +27,8 @@ footer = ("\tvar options = {\n"
           "\t}\n"
           "\t};\n"
           "\tvar chart = new google.charts.Line(document.getElementById('linechart_material'));\n"
+          "\tvar formatter = new google.visualization.NumberFormat({fractionDigits: 2});\n"
+          "\tformatter.format(data, 1);\n"
           "\tchart.draw(data, google.charts.Line.convertOptions(options));\n"
           "\t}\n"
           "\t\t</script>\n"
@@ -39,7 +41,7 @@ footer = ("\tvar options = {\n"
 def convert_datetime(timestamp):
 
     Y = timestamp[:4]
-    M = timestamp[4:6]
+    M = str(int(timestamp[4:6]) - 1) #WTF Google zero indexes months?
     d = timestamp[6:8]
     h = timestamp[8:10]
     m = timestamp[10:12]
